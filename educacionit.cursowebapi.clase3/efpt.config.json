@@ -16,6 +16,10 @@
       {
          "Name": "[dbo].[Shippers]",
          "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Usuarios]",
+         "ObjectType": 0
       }
    ],
    "UiHint": "LAPTOP-H3E2T1KP\\SQLEXPRESS.Northwind",

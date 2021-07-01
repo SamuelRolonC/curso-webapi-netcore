@@ -1,11 +1,14 @@
 using educacionit.cursowebapi.clase3.EFCore;
 using educacionit.cursowebapi.clase3.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace educacionit.cursowebapi.clase3
 {
@@ -24,9 +27,23 @@ namespace educacionit.cursowebapi.clase3
             services.AddControllers();
             
             var strConnection = @"Server=localhost\SQLEXPRESS;Database=Northwind;Integrated Security=true";
-            services.AddDbContext<NorthwindContext>(opciones => opciones.UseSqlServer(strConnection));
+            services.AddDbContext<NorthwindContext>(opciones => opciones.UseSqlServer(Configuration["ConnectionStrings:DevContext"]));
 
             services.AddScoped<ShipperRepository>();
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = Configuration["JWT:Issuer"],
+                    ValidAudience = Configuration["JWT:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:ClaveSecreta"]))
+                };
+            });
 
         }
 
@@ -43,6 +60,7 @@ namespace educacionit.cursowebapi.clase3
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
